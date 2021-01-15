@@ -390,3 +390,16 @@ Feature: dav-versions
     Given user "Brian" has been created with default attributes and without skeleton files
     When user "Brian" sends HTTP method "PROPFIND" to URL "/remote.php/dav/meta/MTI4NGQyMzgtYWEMi00MmNlLWJkxzQtMGIwMDAwMsA5MTU2OjhjY2QyNzUxLTkwYTQtNDBmMi1iOWYzLTYxZWRmODQ0MjFmNA==/v"
     Then the HTTP status code should be "404"
+
+  @issue-ocis-765
+  Scenario: restoring already shared file to previous version
+    Given the administrator has set the default folder for received shares to "Shares"
+    And auto-accept shares has been disabled
+    And user "Brian" has been created with default attributes and without skeleton files
+    And user "Alice" has uploaded file with content "Test Content." to "/toShareFile.txt"
+    And user "Alice" has uploaded file with content "Content Test Updated." to "/toShareFile.txt"
+    And user "Alice" has shared file "/toShareFile.txt" with user "Brian"
+    And user "Brian" has accepted share "/toShareFile.txt" offered by user "Alice"
+    When user "Alice" restores version index "1" of file "/toShareFile.txt" using the WebDAV API
+    Then the content of file "/toShareFile.txt" for user "Alice" should be "Test Content."
+    And as "Brian" file "/Shares/toShareFile.txt" should exist
